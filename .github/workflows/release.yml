@@ -29,7 +29,11 @@ jobs:
             args: --bundles msi,nsis
     runs-on: ${{ matrix.platform }}
     steps:
+      # Caminho de checkout fixo ("repo") para evitar problemas com o nome do
+      # repositório começando em "-", que quebra os caminhos no runner Windows.
       - uses: actions/checkout@v4
+        with:
+          path: repo
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -41,10 +45,11 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: repo/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        run: npm --prefix frontend install
+        working-directory: repo
+        run: npm ci
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -52,6 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          projectPath: repo
           tagName: ${{ github.ref_name }}
           releaseName: "Detoxification Control ${{ github.ref_name }}"
           releaseBody: |
