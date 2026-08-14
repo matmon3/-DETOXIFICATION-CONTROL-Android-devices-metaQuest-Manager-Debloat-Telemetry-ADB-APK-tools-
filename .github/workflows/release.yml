@@ -13,6 +13,12 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Plataformas para build (linux, windows ou ambos)'
+        required: false
+        default: 'linux,windows'
+        type: string
 
 permissions:
   contents: write
@@ -25,8 +31,12 @@ jobs:
         include:
           - platform: ubuntu-22.04
             args: --bundles appimage,rpm,deb
+            id: linux
           - platform: windows-latest
             args: --bundles msi,nsis
+            id: windows
+    # Em tag v* roda tudo; em disparo manual roda só as plataformas escolhidas.
+    if: github.event_name != 'workflow_dispatch' || contains(github.event.inputs.platforms, matrix.id)
     runs-on: ${{ matrix.platform }}
     steps:
       # Caminho de checkout fixo ("repo") para evitar problemas com o nome do
