@@ -1,11 +1,10 @@
 # Build do DETOXIFICATION CONTROL em cada OS e publicação automática no GitHub Release.
 #
-# Dispara em tags v* (ex: v0.1.0) ou manualmente (botão "Run workflow").
-# Cada job roda numa VM própria daquele SO e anexa os artefatos à Release:
-#   - ubuntu-latest   -> AppImage + RPM + DEB
-#   - windows-latest  -> MSI + setup.exe (NSIS)
+# Dispara em tags v* (ex: v0.1.0) ou manualmente (botão "Run workflow",
+# onde você pode escolher só Windows, só Linux ou ambos).
 #
-# Para publicar: git tag v0.1.0 && git push origin v0.1.0
+# Caminho de checkout fixo ("repo") evita problemas com o nome do repositório
+# começando em "-", que quebra os caminhos no runner Windows.
 name: Release
 
 on:
@@ -24,29 +23,15 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: ubuntu-22.04
-            args: --bundles appimage,rpm,deb
-            id: linux
-          - platform: windows-latest
-            args: --bundles msi,nsis
-            id: windows
-    # Em tag v* roda tudo; em disparo manual roda só as plataformas escolhidas.
-    if: github.event_name != 'workflow_dispatch' || contains(github.event.inputs.platforms, matrix.id)
-    runs-on: ${{ matrix.platform }}
+  build-linux:
+    if: github.event_name != 'workflow_dispatch' || contains(github.event.inputs.platforms, 'linux')
+    runs-on: ubuntu-22.04
     steps:
-      # Caminho de checkout fixo ("repo") para evitar problemas com o nome do
-      # repositório começando em "-", que quebra os caminhos no runner Windows.
       - uses: actions/checkout@v4
         with:
           path: repo
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev
@@ -73,4 +58,36 @@ jobs:
           releaseBody: |
             Release gerada automaticamente pelo GitHub Actions.
           releaseDraft: true
-          args: ${{ matrix.args }}
+          args: --bundles appimage,rpm,deb
+
+  build-windows:
+    if: github.event_name != 'workflow_dispatch' || contains(github.event.inputs.platforms, 'windows')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: repo/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: repo
+        run: npm ci
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: repo
+          tagName: ${{ github.ref_name }}
+          releaseName: "Detoxification Control ${{ github.ref_name }}"
+          releaseBody: |
+            Release gerada automaticamente pelo GitHub Actions.
+          releaseDraft: true
+          args: --bundles msi,nsis
