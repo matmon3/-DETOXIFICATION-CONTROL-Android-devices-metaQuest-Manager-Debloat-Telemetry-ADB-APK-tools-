@@ -64,6 +64,11 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || contains(github.event.inputs.platforms, 'windows')
     runs-on: windows-latest
     steps:
+      - name: Enable Windows long paths (git)
+        run: |
+          git config --global core.longpaths true
+          git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
         with:
           path: repo
