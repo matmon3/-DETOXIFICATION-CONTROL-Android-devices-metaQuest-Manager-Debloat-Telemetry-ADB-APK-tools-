@@ -71,6 +71,11 @@ jobs:
           git config --global core.longpaths true
           git config --global core.autocrlf false
 
+      - name: Enable Windows long paths (registry)
+        shell: pwsh
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+
       - uses: actions/checkout@v4
         with:
           path: repo
