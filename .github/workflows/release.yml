@@ -43,7 +43,7 @@ jobs:
           cache-dependency-path: repo/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: repo
+        working-directory: repo/frontend
         run: npm ci
 
       - uses: dtolnay/rust-toolchain@stable
@@ -80,7 +80,7 @@ jobs:
           cache-dependency-path: repo/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: repo
+        working-directory: repo/frontend
         run: npm ci
 
       - uses: dtolnay/rust-toolchain@stable
