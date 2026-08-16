@@ -75,6 +75,8 @@ jobs:
         shell: pwsh
         run: |
           New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+          Write-Host "CARGO_TARGET_DIR=$env:CARGO_TARGET_DIR"
+          Write-Host "GITHUB_WORKSPACE=$env:GITHUB_WORKSPACE"
 
       - uses: actions/checkout@v4
         with:
