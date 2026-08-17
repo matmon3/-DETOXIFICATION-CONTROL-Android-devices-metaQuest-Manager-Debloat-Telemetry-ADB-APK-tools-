@@ -1,5 +1,7 @@
 # <p align="middle">👾☣️Detoxification Control🎛️☣️👾
 
+<img width="1920" height="1031" alt="image" src="https://github.com/user-attachments/assets/d2e1e06b-ab38-4778-88e7-28a286151373" />
+
 # Desktop application for managing Android and Quest 🥽(quest 2,3/3s...)​ devices via ADB. Centralizes package management, Debloat tools, file operations, telemetry control, ADB terminal, made for the most control and management your device to the person who owns the device should have meaningful control over it., to your device be really yours and not for the parasites. 👨‍💻
 
 ## Features
